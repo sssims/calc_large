@@ -14,3 +14,6 @@ big_int new__big_int(char * num_string);
 
 void free__big_int(big_int num);
 /* frees memory allocated to a big_int. Always free a big_int when finished with it. */
+
+big_int add__big_int(big_int num_0, big_int num_1);
+/* adds and returns two big_ints; the function does not free the operands */
