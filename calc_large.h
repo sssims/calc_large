@@ -16,7 +16,10 @@ void print__big_int(big_int num);
 /* prints the big_int num to stdout. No newline is printed */
 
 big_int add__big_int(big_int num_0, big_int num_1);
-/* adds and returns two big_ints; the function does not free the operands */
+/* adds two big_ints and returns sum; allocates space for sum; does not free operands */
+
+big_int mult__big_int(big_int num_0, big_int num_1);
+/* multiplies two big_ints and returns product; allocates space for product; does not free operands */
 
 void free__big_int(big_int num);
 /* frees memory allocated to a big_int. Always free a big_int when finished with it. */

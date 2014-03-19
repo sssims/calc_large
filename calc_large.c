@@ -8,7 +8,18 @@
  *         Call to prepend fatal if leading zeroes exist. 
  *       - Trying to guarentee no leading zeroes when returning 
  *         from function calls.
- */
+ *    - Handling 1 digit numbers troublesome.
+ *       - Problem comes from having default value 0.
+ *         Must append a digit then erase the zero to acheive
+ *         expected value. 
+ *       - Fix could be to have new__big_int() take an int *
+ *         instead of char *. 
+ *            - However, this would make calling new__big_int with
+ *              a literal impossible. A client would have to fill an
+ *              int * then pass it to new__big_int. The ability to call
+ *              new__big_int with a string literal is nice.
+ *            
+ */ 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -176,5 +187,60 @@ big_int add__big_int(big_int num_0, big_int num_1)
       prepend_digit(sum, 1);
  
    return sum;
+}
+
+big_int mult__big_int(big_int num_0, big_int num_1)
+{
+   big_int full_product = new__big_int("0");
+   big_int line_product = new__big_int("0");
+   digit handle_0 = num_0->rear;
+   digit handle_1 = num_1->rear;
+  
+   /* Deal with first digit */ 
+   int curr_product = handle_0->actual * handle_1->actual;
+   int curr_digit   = curr_product % 10;
+   int carry        = (curr_product - curr_digit) / 10;
+   int line         = 0;
+
+   append_digit(line_product, curr_digit);
+   kill_lead_zeroes__big_int(line_product);
+
+   handle_1 = handle_1->previous;
+
+   /* Deal with second and further digits */
+
+   while(1) {
+      if(handle_1 == NULL) {
+         handle_0 = handle_0->previous;
+         handle_1 = num_1->rear;
+
+         if(carry != 0) 
+            prepend_digit(line_product, carry);
+
+         carry = 0;
+         line++;
+
+         big_int temp = add__big_int(full_product, line_product);
+         free__big_int(full_product);
+         free__big_int(line_product);
+         full_product = temp;
+
+         if(handle_0 == NULL) break;
+
+         line_product = new__big_int("0"); 
+         for(int i = 0; i < line - 1; i++) {
+            prepend_digit(line_product, 0);
+         } 
+      }
+      curr_product = (handle_0->actual * handle_1->actual) + carry;
+      curr_digit   = curr_product % 10;
+      carry        = (curr_product - curr_digit) / 10;
+       
+      prepend_digit(line_product, curr_digit);
+
+      handle_1 = handle_1->previous;
+   }
+
+   return full_product;
 }
 
