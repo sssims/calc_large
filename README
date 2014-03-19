@@ -3,4 +3,8 @@ Shane Sims
 
 Solution to Project Euler -- program 3.
 
-The tricky part about the problem is it requires division on a number that is larger than 64 bits. I could either divide the number until its divisors are smaller than 64 bits, which would allow me to use a computer on the remaining factors. Or I could write an arbitrarily large number calculator. The former is undesirable because I would have to do the division by hand. This would be fine if I was confident the original number had a divisor smaller than 30 or so. If not, I'll have to long divide on a huge number many times, possibly hundreds of times. And I'm sure the people at Project Euler picked a number with large factors, like a bunch of jerks.
+The tricky part about the problem is it requires division on a number that is larger than 64 bits. I could either divide the number until its divisors are smaller than 64 bits, which would allow me to use a computer on the remaining factors. Or I could write an arbitrarily-large-number calculator. The former is undesirable because I would have to do the division by hand. This would be fine if I was confident the original number had a factor smaller than 30 or so. If not, I'll have to long divide on a huge number many times, possibly hundreds of times. And I'm sure the people at Project Euler picked a number with large factors, like a bunch of jerks.
+
+Notes:
+   Identity Crisis:
+      Are my identifiers too long?
