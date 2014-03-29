@@ -7,38 +7,48 @@
 
 int main (void) 
 {
-   big_int bi_0 = new__big_int("45");
-   big_int bi_1 = new__big_int("-17");
+   big_int bi_0 = new__big_int("534134");
+   big_int bi_1 = new__big_int("534124");
 
-   big_int bi_2 = add__big_int(bi_0, bi_1);
-    
+   printf("bi_0 = ");
    print__big_int(bi_0);
-   printf("\n+\n");
+   printf("\n");
+   printf("bi_1 = ");
    print__big_int(bi_1);
-   printf("\n=\n");
-   print__big_int(bi_2);
    printf("\n\n");
 
+   big_int sum = add__big_int(bi_0, bi_1);
+    
+   printf("sum = ");
+   print__big_int(sum);
+   printf("\n\n");
+
+   free__big_int(sum);
 
    big_int product = mult__big_int(bi_0, bi_1);
 
-   print__big_int(bi_0);
-   printf("\n*\n");
-   print__big_int(bi_1);
-   printf("\n=\n");
+   printf("product = ");
    print__big_int(product);
-   printf("\n");
+   printf("\n\n");
 
-   printf("comp ");
+   free__big_int(product);
+
+   printf("compare ");
    print__big_int(bi_0);
    printf(" and ");
    print__big_int(bi_1);
-   printf(" = %d\n", cmp__big_int(bi_0, bi_1));
+   printf(" = %d\n\n", cmp__big_int(bi_0, bi_1));
 
-   free__big_int(product);
+   big_int diff = sub__big_int(bi_0, bi_1);
+
+   printf("difference = ");
+   print__big_int(diff);
+   printf("\n\n");
+ 
+   free__big_int(diff);
+
    free__big_int(bi_0);
    free__big_int(bi_1);
-   free__big_int(bi_2);
 
    return 0;
 }

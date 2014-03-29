@@ -97,21 +97,6 @@ void prepend_digit(big_int num, int prependage)
    return;
 }
 
-void print__big_int(big_int num)
-{
-   kill_lead_zeroes__big_int(num);
-
-   digit handle = num->front;
-   if(num->sign == NEGATIVE) {
-      printf("-");
-   }
-   for(int count = 0; count < num->length; count++) {
-      printf("%d", handle->actual);
-      handle = handle->next;
-   }
-   return;
-}
-
 big_int new__big_int(char * num_string)
 {
    if(strcmp("", num_string) == 0 || num_string == NULL) {
@@ -147,6 +132,21 @@ big_int new__big_int(char * num_string)
    return new_bi; 
 }
 
+void print__big_int(big_int num)
+{
+   kill_lead_zeroes__big_int(num);
+
+   digit handle = num->front;
+   if(num->sign == NEGATIVE) {
+      printf("-");
+   }
+   for(int count = 0; count < num->length; count++) {
+      printf("%d", handle->actual);
+      handle = handle->next;
+   }
+   return;
+}
+
 big_int add__big_int(big_int num_0, big_int num_1)
 {
    big_int sum = new__big_int("0");
@@ -154,11 +154,8 @@ big_int add__big_int(big_int num_0, big_int num_1)
    digit handle_1 = num_1->rear;
 
    /* Deal with first digit */
-   int curr_digit = handle_0->actual + handle_1->actual;
    int carry = 0;
-
-   handle_0 = handle_0->previous;
-   handle_1 = handle_1->previous;
+   int curr_digit = handle_0->actual + handle_1->actual;
 
    if(curr_digit >= 10) {
       carry = 1;
@@ -167,6 +164,9 @@ big_int add__big_int(big_int num_0, big_int num_1)
 
    append_digit(sum, curr_digit);
    kill_lead_zeroes__big_int(sum);
+
+   handle_0 = handle_0->previous;
+   handle_1 = handle_1->previous;
 
    /* Deal with further digits */
    while(1) {
@@ -205,16 +205,42 @@ big_int sub__big_int(big_int num_0, big_int num_1)
    digit handle_1 = num_1->rear;
   
    /* Deal with first digit */
-   int carry = 0;
-   int curr_digit = handle_0->actual - handle_1->actual;
-  
+   int carry, curr_digit;
+   
+   if(handle_0->actual >= handle_1->actual) {
+      curr_digit = handle_0->actual - handle_1->actual;
+      carry = 0;
+   } else {
+      curr_digit = 10 - (handle_1->actual - handle_0->actual);
+      carry = 1;
+   }
+   
+   append_digit(diff, curr_digit);
+   kill_lead_zeroes__big_int(diff);
 
-
-
+   handle_0 = handle_0->previous;
+   handle_1 = handle_1->previous;
 
    /* Deal with further digits */
-
-
+   while(1) {
+      if(handle_0 == NULL) break;
+      if(handle_1 == NULL) {
+         curr_digit = handle_0->actual - carry;
+         carry = 0;
+         handle_0 = handle_0->previous;
+      } else {
+         if(handle_0->actual >= handle_1->actual + carry) {
+            curr_digit = handle_0->actual - (handle_1->actual + carry);
+            carry = 0;
+         } else {
+            curr_digit = 10 - ((handle_1->actual + carry) - handle_0->actual);
+            carry = 1;
+         }
+         handle_0 = handle_0->previous;
+         handle_1 = handle_1->previous;
+      }
+      prepend_digit(diff, curr_digit);
+   }
    return diff; 
 }
 
