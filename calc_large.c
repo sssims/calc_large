@@ -3,6 +3,9 @@
  * C source for calc_large
  *
  * KNOWN ISSUES
+ * 
+ * None of the following effect the client.
+ *
  *    - Leading 0's: only remove at print? or periodically remove?
  *       - Must be more often than at print b/c of prepend. 
  *         Call to prepend fatal if leading zeroes exist. 
@@ -26,6 +29,9 @@
 #include <string.h>
 #include "calc_large.h"
 
+#define POSITIVE 0
+#define NEGATIVE 1
+
 typedef struct digit_struct * digit;
 
 struct digit_struct {
@@ -35,6 +41,7 @@ struct digit_struct {
 };
 
 struct big_int__struct {
+   int sign;
    int length;
    digit front;
    digit rear;
@@ -95,22 +102,13 @@ void print__big_int(big_int num)
    kill_lead_zeroes__big_int(num);
 
    digit handle = num->front;
+   if(num->sign == NEGATIVE) {
+      printf("-");
+   }
    for(int count = 0; count < num->length; count++) {
       printf("%d", handle->actual);
       handle = handle->next;
    }
-   return;
-}
-
-void free__big_int(big_int num)
-{
-   digit handle = num->front;
-   for(int count = 0; count < num->length; count++) {
-      digit temp = handle;
-      handle = handle->next;
-      free(temp);
-   }
-   free(num);
    return;
 }
 
@@ -123,13 +121,23 @@ big_int new__big_int(char * num_string)
    big_int new_bi = malloc(sizeof(struct big_int__struct)); 
    new_bi->length = 0;  
 
-   digit zero = malloc(sizeof(struct digit_struct));
-   zero->actual = (int)(*num_string++ - 48);
-   zero->next = NULL;
-   zero->previous = NULL;
+   if(*num_string == '-') {
+      num_string++;
+      new_bi->sign = NEGATIVE;
+   } else if(*num_string == '+') {
+      num_string++;
+      new_bi->sign = POSITIVE;
+   } else {
+      new_bi->sign = POSITIVE;
+   }
 
-   new_bi->front = zero;
-   new_bi->rear  = zero;
+   digit first_digit = malloc(sizeof(struct digit_struct));
+   first_digit->actual = (int)(*num_string++ - 48);
+   first_digit->next = NULL;
+   first_digit->previous = NULL;
+
+   new_bi->front = first_digit;
+   new_bi->rear  = first_digit;
    new_bi->length++;
  
    while(*num_string != '\0') {
@@ -159,8 +167,8 @@ big_int add__big_int(big_int num_0, big_int num_1)
 
    append_digit(sum, curr_digit);
    kill_lead_zeroes__big_int(sum);
-   /* Deal with second and further digits */
 
+   /* Deal with further digits */
    while(1) {
       if(handle_0 == NULL && handle_1 == NULL) break;
       if(handle_0 == NULL) {
@@ -189,6 +197,27 @@ big_int add__big_int(big_int num_0, big_int num_1)
    return sum;
 }
 
+big_int sub__big_int(big_int num_0, big_int num_1)
+/* subtracts num_1 from num_0 */
+{
+   big_int diff = new__big_int("0");
+   digit handle_0 = num_0->rear;
+   digit handle_1 = num_1->rear;
+  
+   /* Deal with first digit */
+   int carry = 0;
+   int curr_digit = handle_0->actual - handle_1->actual;
+  
+
+
+
+
+   /* Deal with further digits */
+
+
+   return diff; 
+}
+
 big_int mult__big_int(big_int num_0, big_int num_1)
 {
    big_int full_product = new__big_int("0");
@@ -207,17 +236,18 @@ big_int mult__big_int(big_int num_0, big_int num_1)
 
    handle_1 = handle_1->previous;
 
-   /* Deal with second and further digits */
+   /* Deal with further digits */
 
    while(1) {
       if(handle_1 == NULL) {
          handle_0 = handle_0->previous;
          handle_1 = num_1->rear;
 
-         if(carry != 0) 
+         if(carry != 0) {
             prepend_digit(line_product, carry);
+            carry = 0;
+         }
 
-         carry = 0;
          line++;
 
          big_int temp = add__big_int(full_product, line_product);
@@ -242,5 +272,72 @@ big_int mult__big_int(big_int num_0, big_int num_1)
    }
 
    return full_product;
+}
+
+/*big_int mod__big_int(big_int divend, big_int divsor)
+{
+   big_int mod = new__big_int("0");
+
+
+
+
+   return mod;
+}*/
+
+int cmp__big_int(big_int num_0, big_int num_1)
+{
+   /* test signs. If different signs -> positive num is larger */
+   if(num_0->sign == POSITIVE && num_1->sign == NEGATIVE) {
+      return 1;
+   } else if(num_0->sign == NEGATIVE && num_1->sign == POSITIVE) {
+      return -1;
+   }
+
+   /* can take sign from either big_num as they guaranteed same sign here */ 
+   int sign = num_0->sign;
+
+   /* test lengths. If different lengths -> (if negative -> shorter number is greater) *
+    *                                        (if positive -> longer  number is greater) */
+   if(num_0->length > num_1->length) {
+      if(sign == POSITIVE) return 1;
+      else                 return -1;
+   } else if(num_0->length < num_1->length) {
+      if(sign == POSITIVE) return -1;
+      else                 return 1;
+   }
+
+   /* If here in function -> both nums are same sign and same length */
+   
+   /* Starting at fronts, step through nums until digits are different */
+
+   digit handle_0 = num_0->front;
+   digit handle_1 = num_1->front;
+
+   while(handle_0 != NULL && handle_1 != NULL) {
+      if(handle_0->actual > handle_1->actual) {
+         if(sign == POSITIVE) return 1;
+         else                 return -1;
+      } else if(handle_0->actual < handle_1->actual) {
+         if(sign == POSITIVE) return -1;
+         else                 return 1;
+      }
+      handle_0 = handle_0->next;
+      handle_1 = handle_1->next;
+   }
+
+   /* no digits were found to be different -> nums are equal */
+   return 0;
+}
+
+void free__big_int(big_int num)
+{
+   digit handle = num->front;
+   for(int count = 0; count < num->length; count++) {
+      digit temp = handle;
+      handle = handle->next;
+      free(temp);
+   }
+   free(num);
+   return;
 }
 
