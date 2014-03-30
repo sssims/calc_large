@@ -148,9 +148,9 @@ void print__big_int(big_int num)
 }
 
 big_int add_abs__big_int(big_int num_0, big_int num_1)
-/* This function is a handle to the add__big_int and sub__big_int functions
- * and should NOT be called from anywhere other than those functions.
- * Use add__big_int to add 2 big_ints safely. 
+/* Function adds the absolute value of (abs) num_0 to abs num_1.
+ * This function ignores all negative signs, use accordingly. 
+ * Use add__big_int() to add two big_ints safely.
  */
 {
    big_int sum = new__big_int("0");
@@ -202,20 +202,19 @@ big_int add_abs__big_int(big_int num_0, big_int num_1)
 }
 
 big_int sub_abs__big_int(big_int num_0, big_int num_1)
-/* subtracts num_1 from num_0 
+/* subtracts absolute value of (abs) num_1 from abs num_0. Gives abs result.
  *
- * WARNING:
- * num_0 MUST be larger than num_1: Use sub__big_int to subtract 2 big_ints safely. 
- * 
- * This function is a handle for the add__big_int and sub__big_int functions 
- * and should NOT be called from anywhere other than those functions. Again,
- * use sub__big_int to subtract 2 big_ints safely. 
+ * This function ignores all negative signs. Use accordingly. 
+ * Use sub__big_int() two subtract 2 big_ints safely.
  */
 {
    big_int diff = new__big_int("0");
-   digit handle_0 = num_0->rear;
-   digit handle_1 = num_1->rear;
-  
+ 
+   digit handle_0, handle_1;
+ 
+   handle_0 = num_0->rear;
+   handle_1 = num_1->rear;
+
    /* Deal with first digit */
    int carry, curr_digit;
    
@@ -380,23 +379,42 @@ big_int mult__big_int(big_int num_0, big_int num_1)
       handle_1 = handle_1->previous;
    }
 
-   if(num_0->sign == POSITIVE && num_1->sign == POSITIVE) full_product->sign = POSITIVE;
-   if(num_0->sign == POSITIVE && num_1->sign == NEGATIVE) full_product->sign = NEGATIVE;
-   if(num_0->sign == NEGATIVE && num_1->sign == POSITIVE) full_product->sign = NEGATIVE;
-   if(num_0->sign == NEGATIVE && num_1->sign == NEGATIVE) full_product->sign = POSITIVE;
+   if(num_0->sign == POSITIVE && num_1->sign == POSITIVE)      full_product->sign = POSITIVE;
+   else if(num_0->sign == POSITIVE && num_1->sign == NEGATIVE) full_product->sign = NEGATIVE;
+   else if(num_0->sign == NEGATIVE && num_1->sign == POSITIVE) full_product->sign = NEGATIVE;
+   else if(num_0->sign == NEGATIVE && num_1->sign == NEGATIVE) full_product->sign = POSITIVE;
 
    return full_product;
 }
 
-/*big_int mod__big_int(big_int divend, big_int divsor)
+big_int mod__big_int(big_int divend, big_int divsor)
 {
-   big_int mod = new__big_int("0");
+   big_int handle = new__big_int("0");
+ 
+   if(divend->sign == POSITIVE) { 
+      while(cmp__big_int(divend, handle) > 0) {
+         big_int temp = handle;
+         handle = add_abs__big_int(temp, divsor); 
+         free__big_int(temp);
+      }
+   } else {
+      while(cmp__big_int(divend, handle) < 0) {
+         big_int temp = handle;
+         handle = add_abs__big_int(handle, divsor);
+         handle->sign = NEGATIVE;
+         free__big_int(temp);
+      }
+      big_int temp = handle;
+      handle = sub_abs__big_int(handle, divsor);
+      handle->sign = NEGATIVE;
+      free(temp);
+   }
 
-
-
-
+   big_int mod = sub__big_int(handle, divend);
+   free__big_int(handle);
+   
    return mod;
-}*/
+}
 
 int cmp__big_int(big_int num_0, big_int num_1)
 {
@@ -411,7 +429,7 @@ int cmp__big_int(big_int num_0, big_int num_1)
    int sign = num_0->sign;
 
    /* test lengths. If different lengths -> (if negative -> shorter number is greater) *
-    *                                        (if positive -> longer  number is greater) */
+    *                                       (if positive -> longer  number is greater) */
    if(num_0->length > num_1->length) {
       if(sign == POSITIVE) return 1;
       else                 return -1;

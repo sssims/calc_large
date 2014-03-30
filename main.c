@@ -52,6 +52,14 @@ int main (int argc, char **argv)
  
    free__big_int(diff);
 
+   big_int mod = mod__big_int(bi_0, bi_1);
+
+   printf("modulo = ");
+   print__big_int(mod);
+   printf("\n\n");
+
+   free__big_int(mod);
+ 
    free__big_int(bi_0);
    free__big_int(bi_1);
 

@@ -33,6 +33,9 @@ big_int mult__big_int(big_int num_0, big_int num_1);
 big_int div__big_int(big_int num_0, big_int num_1);
 /* divides two big_ints and returns quotient; allocates space for quotient; does not free operands*/
 
+big_int mod__big_int(big_int divend, big_int divsor);
+/* performs modulo on 2 big_ints: dividend by devisor; does not allocate space for mod; does not free operands*/
+
 int cmp__big_int(big_int num_0, big_int num_1);
 /* compares two big_ints value; returns 0 if equal, 1 if num_0 > num_1, and -1 if num_0 < num_1; does not free operands */
 
