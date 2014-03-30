@@ -5,10 +5,15 @@
 #include <stdio.h>
 #include "calc_large.h"
 
-int main (void) 
+int main (int argc, char **argv) 
 {
-   big_int bi_0 = new__big_int("534134");
-   big_int bi_1 = new__big_int("534124");
+   if(argc != 3) {
+      fprintf(stderr,"Provide 2 integers for big_int arithmatic\n");
+      return 1;
+   }
+
+   big_int bi_0 = new__big_int(argv[1]);
+   big_int bi_1 = new__big_int(argv[2]);
 
    printf("bi_0 = ");
    print__big_int(bi_0);

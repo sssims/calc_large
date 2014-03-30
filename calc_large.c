@@ -9,7 +9,7 @@
  *    - Leading 0's: only remove at print? or periodically remove?
  *       - Must be more often than at print b/c of prepend. 
  *         Call to prepend fatal if leading zeroes exist. 
- *       - Trying to guarentee no leading zeroes when returning 
+ *       - Guarentee no leading zeroes when returning 
  *         from function calls.
  *    - Handling 1 digit numbers troublesome.
  *       - Problem comes from having default value 0.
@@ -147,7 +147,11 @@ void print__big_int(big_int num)
    return;
 }
 
-big_int add__big_int(big_int num_0, big_int num_1)
+big_int add_abs__big_int(big_int num_0, big_int num_1)
+/* This function is a handle to the add__big_int and sub__big_int functions
+ * and should NOT be called from anywhere other than those functions.
+ * Use add__big_int to add 2 big_ints safely. 
+ */
 {
    big_int sum = new__big_int("0");
    digit handle_0 = num_0->rear;
@@ -197,8 +201,16 @@ big_int add__big_int(big_int num_0, big_int num_1)
    return sum;
 }
 
-big_int sub__big_int(big_int num_0, big_int num_1)
-/* subtracts num_1 from num_0 */
+big_int sub_abs__big_int(big_int num_0, big_int num_1)
+/* subtracts num_1 from num_0 
+ *
+ * WARNING:
+ * num_0 MUST be larger than num_1: Use sub__big_int to subtract 2 big_ints safely. 
+ * 
+ * This function is a handle for the add__big_int and sub__big_int functions 
+ * and should NOT be called from anywhere other than those functions. Again,
+ * use sub__big_int to subtract 2 big_ints safely. 
+ */
 {
    big_int diff = new__big_int("0");
    digit handle_0 = num_0->rear;
@@ -242,6 +254,77 @@ big_int sub__big_int(big_int num_0, big_int num_1)
       prepend_digit(diff, curr_digit);
    }
    return diff; 
+}
+
+big_int add__big_int(big_int num_0, big_int num_1)
+{
+   big_int sum = NULL;   
+
+   if(num_0->sign == POSITIVE && num_1->sign == POSITIVE) {
+      sum = add_abs__big_int(num_0, num_1);
+   } else if(num_0->sign == NEGATIVE && num_1->sign == NEGATIVE) {
+      sum = add_abs__big_int(num_0, num_1);
+      sum->sign = NEGATIVE;
+   } else if(num_0->sign == POSITIVE && num_1->sign == NEGATIVE) {
+      /* calculate which absolute value is greater. sub_actual smaller from greater */
+      /* Also if negative number has greater absolute value -> sum is negative */
+      num_1->sign = POSITIVE;
+      if(cmp__big_int(num_0, num_1) >= 0) {
+         sum = sub_abs__big_int(num_0, num_1);
+         sum->sign = POSITIVE;
+      } else {
+         sum = sub_abs__big_int(num_1, num_0);
+         sum->sign = NEGATIVE;
+      }
+      num_1->sign = NEGATIVE;
+   } else if(num_0->sign == NEGATIVE && num_1->sign == POSITIVE) {
+      num_0->sign = POSITIVE;
+      if(cmp__big_int(num_0, num_1) > 0) {
+         sum = sub_abs__big_int(num_0, num_1);
+         sum->sign = NEGATIVE;
+      } else {
+         sum = sub_abs__big_int(num_1, num_0);
+         sum->sign = POSITIVE;
+      }
+      num_0->sign = NEGATIVE;
+   } else {
+      fprintf(stderr,"FATAL ERROR: UNEXPECTED BEHAVIOR IN ADD__BIG_INT()\n");
+   } 
+
+   return sum;
+}
+
+big_int sub__big_int(big_int num_0, big_int num_1)
+{
+   big_int diff = NULL;   
+
+   if(num_0->sign == POSITIVE && num_1->sign == POSITIVE) {
+      if(cmp__big_int(num_0, num_1) >= 0) {
+         diff = sub_abs__big_int(num_0, num_1);
+         diff->sign = POSITIVE;
+      } else {
+         diff = sub_abs__big_int(num_1, num_0);
+         diff->sign = NEGATIVE;
+      }
+   } else if(num_0->sign == NEGATIVE && num_1->sign == NEGATIVE) {
+      if(cmp__big_int(num_0, num_1) < 0) {
+         diff = sub_abs__big_int(num_0, num_1);
+         diff->sign = NEGATIVE;
+      } else {
+         diff = sub_abs__big_int(num_1, num_0);
+         diff->sign = POSITIVE;
+      }
+   } else if(num_0->sign == POSITIVE && num_1->sign == NEGATIVE) {
+         diff = add_abs__big_int(num_0, num_1);
+         diff->sign = POSITIVE;
+   } else if(num_0->sign == NEGATIVE && num_1->sign == POSITIVE) {
+         diff = add_abs__big_int(num_0, num_1);
+         diff->sign = NEGATIVE;
+   } else {
+      fprintf(stderr,"FATAL ERROR: UNEXPECTED BEHAVIOR IN SUM__BIG_INT()\n");
+   } 
+
+   return diff;
 }
 
 big_int mult__big_int(big_int num_0, big_int num_1)
@@ -296,6 +379,11 @@ big_int mult__big_int(big_int num_0, big_int num_1)
 
       handle_1 = handle_1->previous;
    }
+
+   if(num_0->sign == POSITIVE && num_1->sign == POSITIVE) full_product->sign = POSITIVE;
+   if(num_0->sign == POSITIVE && num_1->sign == NEGATIVE) full_product->sign = NEGATIVE;
+   if(num_0->sign == NEGATIVE && num_1->sign == POSITIVE) full_product->sign = NEGATIVE;
+   if(num_0->sign == NEGATIVE && num_1->sign == NEGATIVE) full_product->sign = POSITIVE;
 
    return full_product;
 }
