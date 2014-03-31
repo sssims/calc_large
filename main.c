@@ -60,6 +60,14 @@ int main (int argc, char **argv)
 
    free__big_int(mod);
  
+   big_int quo = div__big_int(bi_0, bi_1);
+
+   printf("quotient = ");
+   print__big_int(quo);
+   printf("\n\n");
+ 
+   free__big_int(quo);
+
    free__big_int(bi_0);
    free__big_int(bi_1);
 

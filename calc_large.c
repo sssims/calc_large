@@ -2,9 +2,7 @@
  *
  * C source for calc_large
  *
- * KNOWN ISSUES
- * 
- * None of the following effect the client.
+ * NOTES -- None of the following effect the client.
  *
  *    - Leading 0's: only remove at print? or periodically remove?
  *       - Must be more often than at print b/c of prepend. 
@@ -385,6 +383,51 @@ big_int mult__big_int(big_int num_0, big_int num_1)
    else if(num_0->sign == NEGATIVE && num_1->sign == NEGATIVE) full_product->sign = POSITIVE;
 
    return full_product;
+}
+
+big_int div__big_int(big_int divend, big_int divsor)
+/* quotient only guaranteed to be correct if divisor divides evenly into dividend */
+{ 
+   if(cmp__big_int(divend, divsor) < 0) {
+      return new__big_int("0");
+   }
+
+   big_int handle   = new__big_int("0");
+   big_int quotient = new__big_int("0");
+   big_int one      = new__big_int("1");
+
+   int neg_marker_0 = 0, neg_marker_1 = 0;
+
+   if(divend->sign == NEGATIVE) {
+      divend->sign = POSITIVE;
+      neg_marker_0 = 1;
+   }
+   if(divsor->sign == NEGATIVE) {
+      divsor->sign = POSITIVE;
+      neg_marker_1 = 1;
+   }
+
+   while(cmp__big_int(divend, handle) > 0) {
+      big_int temp_0 = handle;
+      big_int temp_1 = quotient;
+
+      handle   = add__big_int(handle, divsor);
+      quotient = add__big_int(quotient, one);
+ 
+      free__big_int(temp_0);
+      free__big_int(temp_1);
+   }
+
+   if(neg_marker_0) divend->sign = NEGATIVE;
+   if(neg_marker_1) divsor->sign = NEGATIVE;
+
+   if(neg_marker_0 && !neg_marker_1) quotient->sign = NEGATIVE;
+   if(!neg_marker_0 && neg_marker_1) quotient->sign = NEGATIVE;
+
+   free__big_int(one);
+   free__big_int(handle);
+ 
+   return quotient;
 }
 
 big_int mod__big_int(big_int divend, big_int divsor)
