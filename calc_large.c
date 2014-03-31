@@ -234,8 +234,13 @@ big_int sub_abs__big_int(big_int num_0, big_int num_1)
    while(1) {
       if(handle_0 == NULL) break;
       if(handle_1 == NULL) {
-         curr_digit = handle_0->actual - carry;
-         carry = 0;
+         if(handle_0->actual == 0 && carry == 1) {
+            curr_digit = 9;
+            carry = 1;
+         } else {
+            curr_digit = handle_0->actual - carry;
+            carry = 0;
+         }
          handle_0 = handle_0->previous;
       } else {
          if(handle_0->actual >= handle_1->actual + carry) {
@@ -320,6 +325,8 @@ big_int sub__big_int(big_int num_0, big_int num_1)
    } else {
       fprintf(stderr,"FATAL ERROR: UNEXPECTED BEHAVIOR IN SUM__BIG_INT()\n");
    } 
+   
+   kill_lead_zeroes__big_int(diff);
 
    return diff;
 }

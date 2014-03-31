@@ -31,7 +31,7 @@ big_int mult__big_int(big_int num_0, big_int num_1);
 /* multiplies two big_ints and returns product; allocates space for product; does not free operands */
 
 big_int div__big_int(big_int num_0, big_int num_1);
-/* divides two big_ints and returns quotient; allocates space for quotient; does not free operands*/
+/* divides two big_ints and returns quotient. Does NOT take remainder into account. Does NOT include remainder as appended decimal; allocates space for quotient; does not free operands. */
 
 big_int mod__big_int(big_int divend, big_int divsor);
 /* performs modulo on 2 big_ints: dividend by devisor; does not allocate space for mod; does not free operands*/
