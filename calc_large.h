@@ -18,6 +18,9 @@ big_int new__big_int(char * num_string);
  * First character can be a '-' or a '+' to indicate sign. If no sign is indicated the big_int
    will be positive */
 
+int get_length__big_int(big_int num);
+/* returns length of big_int num in number of digits */
+
 void print__big_int(big_int num);
 /* prints the big_int to stdout. No newline is printed */
 

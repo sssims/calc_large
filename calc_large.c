@@ -130,6 +130,11 @@ big_int new__big_int(char * num_string)
    return new_bi; 
 }
 
+int get_length__big_int(big_int num)
+{
+   return num->length;
+}
+
 void print__big_int(big_int num)
 {
    kill_lead_zeroes__big_int(num);
@@ -325,8 +330,6 @@ big_int sub__big_int(big_int num_0, big_int num_1)
    } else {
       fprintf(stderr,"FATAL ERROR: UNEXPECTED BEHAVIOR IN SUM__BIG_INT()\n");
    } 
-   
-   kill_lead_zeroes__big_int(diff);
 
    return diff;
 }
@@ -392,7 +395,7 @@ big_int mult__big_int(big_int num_0, big_int num_1)
    return full_product;
 }
 
-big_int div__big_int(big_int divend, big_int divsor)
+big_int div_short__big_int(big_int divend, big_int divsor)
 /* quotient only guaranteed to be correct if divisor divides evenly into dividend */
 { 
    if(cmp__big_int(divend, divsor) < 0) {
@@ -425,6 +428,12 @@ big_int div__big_int(big_int divend, big_int divsor)
       free__big_int(temp_1);
    }
 
+   if(cmp__big_int(divend, handle) != 0) {
+      big_int temp = quotient;
+      quotient = sub__big_int(quotient, one);
+      free__big_int(temp);
+   }
+
    if(neg_marker_0) divend->sign = NEGATIVE;
    if(neg_marker_1) divsor->sign = NEGATIVE;
 
@@ -434,10 +443,56 @@ big_int div__big_int(big_int divend, big_int divsor)
    free__big_int(one);
    free__big_int(handle);
  
+   kill_lead_zeroes__big_int(quotient);
+
    return quotient;
 }
 
-big_int mod__big_int(big_int divend, big_int divsor)
+big_int div__big_int(big_int divend, big_int divsor)
+{
+   big_int quotient = new__big_int("0");
+   big_int handle  = new__big_int("0");
+ 
+   digit curr_digit = divend->front; 
+
+   append_digit(handle, curr_digit->actual);
+   kill_lead_zeroes__big_int(handle);
+
+   while(1) {
+      curr_digit = curr_digit->next;
+
+      if(cmp__big_int(divsor, handle) > 0) {
+         append_digit(quotient, 0);
+      } else {  
+         big_int curr_add = div_short__big_int(handle, divsor);
+         if(curr_add->length > 1) {
+            printf("ERROR: current edition is too high: ");
+            print__big_int(curr_add);
+            printf("\n");
+         }
+         append_digit(quotient, curr_add->front->actual);
+         big_int curr_diff = mult__big_int(curr_add, divsor);
+         free(curr_add);
+
+         big_int temp = handle;
+         handle = sub__big_int(handle, curr_diff);
+         free(temp);
+         free(curr_diff);
+      }
+      if(curr_digit == NULL) {
+         break;
+      }
+      append_digit(handle, curr_digit->actual);
+      kill_lead_zeroes__big_int(handle);
+   }
+
+   return quotient;
+}
+
+big_int mod_short__big_int(big_int divend, big_int divsor)
+/* This is function is ineffiecient for long big_ints.
+ * It is only used for finding remainders during long division 
+ */
 {
    big_int handle = new__big_int("0");
  
@@ -462,7 +517,62 @@ big_int mod__big_int(big_int divend, big_int divsor)
 
    big_int mod = sub__big_int(handle, divend);
    free__big_int(handle);
-   
+  
+   kill_lead_zeroes__big_int(mod);
+ 
+   return mod;
+}
+
+big_int mod__big_int(big_int divend, big_int divsor)
+{
+   big_int quotient = new__big_int("0");
+   big_int handle  = new__big_int("0");
+ 
+   digit curr_digit = divend->front; 
+
+   append_digit(handle, curr_digit->actual);
+   kill_lead_zeroes__big_int(handle);
+
+   while(1) {
+      curr_digit = curr_digit->next;
+
+      if(cmp__big_int(divsor, handle) > 0) {
+         append_digit(quotient, 0);
+      } else {  
+         big_int curr_add = div_short__big_int(handle, divsor);
+         if(curr_add->length > 1) {
+            printf("ERROR: current edition is too high: ");
+            print__big_int(curr_add);
+            printf("\n");
+         }
+         append_digit(quotient, curr_add->front->actual);
+         big_int curr_diff = mult__big_int(curr_add, divsor);
+         free(curr_add);
+
+         big_int temp = handle;
+         handle = sub__big_int(handle, curr_diff);
+         free(temp);
+         free(curr_diff);
+      }
+      if(curr_digit == NULL) {
+         break;
+      }
+      append_digit(handle, curr_digit->actual);
+      kill_lead_zeroes__big_int(handle);
+   }
+
+   big_int temp = handle;
+   handle = mult__big_int(quotient, divsor);
+   free(temp);
+
+   if(cmp__big_int(handle, divend) != 0) {
+      temp = handle;
+      handle = add__big_int(handle, divsor);
+      free(temp);
+   }
+   big_int mod = sub__big_int(handle, divend);
+   free(handle);
+  
    return mod;
 }
 
@@ -480,6 +590,10 @@ int cmp__big_int(big_int num_0, big_int num_1)
 
    /* test lengths. If different lengths -> (if negative -> shorter number is greater) *
     *                                       (if positive -> longer  number is greater) */
+
+    kill_lead_zeroes__big_int(num_0);
+    kill_lead_zeroes__big_int(num_1);
+
    if(num_0->length > num_1->length) {
       if(sign == POSITIVE) return 1;
       else                 return -1;
