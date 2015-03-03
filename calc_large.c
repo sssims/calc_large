@@ -576,6 +576,64 @@ big_int mod__big_int(big_int divend, big_int divsor)
    return mod;
 }
 
+void inc__big_int(big_int num)
+{
+   digit handle = num->rear;
+   if(num->sign == POSITIVE) {
+      while(handle->actual == 9) {
+         handle->actual = 0;
+         handle = handle->previous;
+         if(handle == NULL) {
+            prepend_digit(num, 1);
+            return;
+         }
+      }
+      handle->actual++;
+   } else {
+      if(num->length == 1 && num->front->actual == 1) {
+         num->sign = POSITIVE;
+         num->front->actual = 0;
+         return;
+      }
+      while(handle->actual == 0) {
+         handle->actual = 9;
+         handle = handle->previous;
+      }
+      handle->actual--;
+      kill_lead_zeroes__big_int(num);
+   }
+   return;
+}
+
+void dec__big_int(big_int num)
+{
+   digit handle = num->rear;
+   if(num->sign == POSITIVE) {
+      while(handle->actual == 9) {
+         handle->actual = 0;
+         handle = handle->previous;
+         if(handle == NULL) {
+            prepend_digit(num, 1);
+            return;
+         }
+      }
+      handle->actual++;
+   } else {
+      if(num->length == 1 && num->front->actual == 1) {
+         num->sign = POSITIVE;
+         num->front->actual = 0;
+         return;
+      }
+      while(handle->actual == 0) {
+         handle->actual = 9;
+         handle = handle->previous;
+      }
+      handle->actual--;
+      kill_lead_zeroes__big_int(num);
+   }
+   return;
+}
+
 int cmp__big_int(big_int num_0, big_int num_1)
 {
    /* test signs. If different signs -> positive num is larger */
@@ -623,6 +681,23 @@ int cmp__big_int(big_int num_0, big_int num_1)
 
    /* no digits were found to be different -> nums are equal */
    return 0;
+}
+
+int is_palindrome__big_int(big_int num)
+{
+   digit front = num->front;
+   digit back  = num->rear;
+
+   int middle_dig = num->length / 2;
+
+   for(int i = 0; i < middle_dig; i++) {
+      if(front->actual != back->actual)
+         return 0;
+      front = front->next;
+      back  = back->previous;
+   }
+
+   return 1;
 }
 
 void free__big_int(big_int num)

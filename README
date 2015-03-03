@@ -1,12 +1,12 @@
 Shane Sims
-<EMAIL>
+Sims050391@gmail.com	
 
-Solution to Project Euler -- program 3.
+large_calc
 
-The tricky part about the problem is it requires division on a number that is larger than 64 bits. I could either divide the number until its divisors are smaller than 64 bits, which would allow me to use a computer on the remaining factors. Or I could write an arbitrarily-large-number calculator. The former is undesirable because I would have to do the division by hand. This would be fine if I was confident the original number had a factor smaller than 30 or so. If not, I'll have to long divide on a huge number many times, possibly hundreds of times. And I'm sure the people at Project Euler picked a number with large factors, like a bunch of jerks.
+large_calculator functionality. See calc_large.h
 
 Notes:
-   -Calculator implimented using "long" style arithmatic. e.g. Mult function multiplies 1 digit at a time and carries to next digit if required. 
+   -Calculator implimented using "long" style arithmatic. e.i. Long division. 
    -Identity Crisis: Are my identifiers too long?
 
 

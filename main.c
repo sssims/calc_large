@@ -1,60 +1,98 @@
+/* Shane Sims
+ * <EMAIL>
+ */
+
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include "calc_large.h"
 
-big_int lowest_devisor(big_int num)
-{ 
-   int length = 0;
-
-   big_int zero = new__big_int("0");
-   big_int one  = new__big_int("1");
-   big_int i    = new__big_int("2");
-   while(cmp__big_int(i, num) < 0) {
-      big_int mod = mod__big_int(num, i);
-      if(cmp__big_int(mod, zero) == 0) {
-         free__big_int(zero);
-         free__big_int(one);
-         free__big_int(mod);
-         return i;
-      }
-      free__big_int(mod);
-
-      big_int temp = i;
-      i = add__big_int(i, one);
-      free(temp);
-
-      if(get_length__big_int(i) != length) {
-         length = get_length__big_int(i);
-         printf("%d\n", length);
-      }
-   }
-   free__big_int(one);
-   free__big_int(i);
-
-   return zero;
-}
-
-int main(int argc, char **argv)
+int main (int argc, char **argv) 
 {
-   if(argc != 2) {
-      fprintf(stderr, "supply 1 number to find largest prime factor\n");
-      exit(1);
+   if(argc != 3) {
+      fprintf(stderr,"Provide 2 integers for big_int arithmatic\n");
+      return 1;
    }
-   big_int result = new__big_int(argv[1]);
 
-   big_int zero = new__big_int("0");
+   big_int bi_0 = new__big_int(argv[1]);
+   big_int bi_1 = new__big_int(argv[2]);
 
-   while(cmp__big_int(lowest_devisor(result), zero) != 0) {
-      big_int factor = lowest_devisor(result);
-      print__big_int(factor);
-      printf("\n");
-      big_int temp = result;
-      result = div__big_int(result, factor);  
-      printf("----\n");
-      free(temp);
-   }
-   print__big_int(result);
+   printf("bi_0 = ");
+   print__big_int(bi_0);
    printf("\n");
+   printf("bi_1 = ");
+   print__big_int(bi_1);
+   printf("\n\n");
+
+   big_int sum = add__big_int(bi_0, bi_1);
+    
+   printf("sum = ");
+   print__big_int(sum);
+   printf("\n\n");
+
+   free__big_int(sum);
+
+   big_int product = mult__big_int(bi_0, bi_1);
+
+   printf("product = ");
+   print__big_int(product);
+   printf("\n\n");
+
+   free__big_int(product);
+
+   printf("compare ");
+   print__big_int(bi_0);
+   printf(" and ");
+   print__big_int(bi_1);
+   printf(" = %d\n\n", cmp__big_int(bi_0, bi_1));
+
+   big_int diff = sub__big_int(bi_0, bi_1);
+
+   printf("difference = ");
+   print__big_int(diff);
+   printf("\n\n");
+ 
+   free__big_int(diff);
+
+   big_int mod = mod__big_int(bi_0, bi_1);
+
+   printf("modulo = ");
+   print__big_int(mod);
+   printf("\n\n");
+
+   free__big_int(mod);
+ 
+   big_int quo = div__big_int(bi_0, bi_1);
+
+   printf("quotient = ");
+   print__big_int(quo);
+   printf("\n\n");
+ 
+   free__big_int(quo);
+
+   printf("bi_0 = ");
+   print__big_int(bi_0);
+   if(is_palindrome__big_int(bi_0))
+      printf(" is a palindrome\n");
+   else
+      printf(" is not a palindrome\n");
+
+   printf("bi_1 = ");
+   print__big_int(bi_1);
+   if(is_palindrome__big_int(bi_1))
+      printf(" is a palindrome\n");
+   else
+      printf(" is not a palindrome\n");
+
+   inc__big_int(bi_0);
+   inc__big_int(bi_1);
+
+   printf("both big ints incremented:\n");
+   print__big_int(bi_0);
+   printf("\n");
+   print__big_int(bi_1);
+   printf("\n");
+
+   free__big_int(bi_0);
+   free__big_int(bi_1);
+
    return 0;
 }
