@@ -6,7 +6,7 @@ large_calc
 large_calculator functionality. See calc_large.h
 
 Notes:
-   -Calculator implimented using "long" style arithmatic. e.i. Long division. 
+   -Calculator implemented using "long" style arithmatic. e.i. Long division. 
    -Identity Crisis: Are my identifiers too long?
 
 
